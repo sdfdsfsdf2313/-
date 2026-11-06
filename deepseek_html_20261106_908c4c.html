@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МебельТаганрог — рассылка заявок</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f2ee;
+    color: #2b2b2b;
+    line-height: 1.5;
+  }
+  header {
+    background: #3d2b1f;
+    color: #f4f2ee;
+    padding: 20px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header h1 { font-size: 20px; letter-spacing: .5px; }
+  header .badge {
+    background: #b8860b; color: #fff; padding: 4px 10px;
+    border-radius: 20px; font-size: 12px; font-weight: 600;
+  }
+  .wrap { max-width: 980px; margin: 32px auto; padding: 0 20px; }
+
+  .card {
+    background: #fff; border-radius: 12px; padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    margin-bottom: 24px;
+  }
+  .card h2 { font-size: 18px; margin-bottom: 16px; color: #3d2b1f; }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #555; }
+  input, textarea, select {
+    width: 100%; padding: 11px 14px; border: 1px solid #d9d3c8;
+    border-radius: 8px; font-size: 14px; font-family: inherit;
+    background: #fdfcfb; transition: border .15s;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none; border-color: #b8860b; background: #fff;
+  }
+  textarea { resize: vertical; min-height: 120px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  .field { margin-bottom: 16px; }
+
+  .hint { font-size: 12px; color: #999; margin-top: 4px; }
+
+  .companies { display: grid; gap: 10px; margin-top: 8px; }
+  .company {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px; border: 1px solid #e6e0d6; border-radius: 8px;
+    background: #fdfcfb; cursor: pointer; transition: all .15s;
+  }
+  .company:hover { border-color: #b8860b; background: #fff; }
+  .company.checked { border-color: #b8860b; background: #fffaf0; }
+  .company input { width: auto; margin-top: 3px; accent-color: #b8860b; }
+  .company .info { flex: 1; }
+  .company .name { font-weight: 600; font-size: 14px; }
+  .company .mail { font-size: 12px; color: #888; }
+  .company .tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: #eef3ea; color: #4a7c3f; font-weight: 600;
+  }
+
+  .btn {
+    background: #b8860b; color: #fff; border: none; padding: 13px 28px;
+    border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: background .15s;
+  }
+  .btn:hover { background: #a3750a; }
+  .btn:disabled { background: #d9d3c8; cursor: not-allowed; }
+  .btn-secondary {
+    background: #fff; color: #3d2b1f; border: 1px solid #d9d3c8;
+  }
+  .btn-secondary:hover { background: #f4f2ee; }
+
+  .progress { margin-top: 16px; display: none; }
+  .progress-bar {
+    height: 8px; background: #e6e0d6; border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%; background: #b8860b; transition: width .3s;
+  }
+  .progress-text { font-size: 13px; color: #777; margin-top: 6px; }
+
+  .inbox { display: none; }
+  .inbox.show { display: block; }
+  .mail-item {
+    border: 1px solid #e6e0d6; border-radius: 8px; padding: 14px 16px;
+    margin-bottom: 10px; background: #fdfcfb;
+  }
+  .mail-item .from { font-weight: 600; font-size: 14px; color: #3d2b1f; }
+  .mail-item .subject { font-size: 13px; color: #555; margin: 4px 0; }
+  .mail-item .body { font-size: 13px; color: #777; }
+  .mail-item .time { font-size: 11px; color: #aaa; float: right; }
+
+  .status-msg {
+    padding: 12px 16px; border-radius: 8px; font-size: 14px;
+    margin-top: 16px; display: none;
+  }
+  .status-msg.show { display: block; }
+  .status-msg.ok { background: #eef3ea; color: #4a7c3f; }
+  .status-msg.warn { background: #fdf4e3; color: #a3750a; }
+
+  .demo-note {
+    background: #fdf4e3; border-left: 4px solid #b8860b;
+    padding: 12px 16px; font-size: 13px; color: #7a5a08;
+    border-radius: 0 8px 8px 0; margin-bottom: 20px;
+  }
+  .footer { text-align: center; font-size: 12px; color: #aaa; padding: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🪑 МебельТаганрог — рассылка заявок</h1>
+  <span class="badge">ДЕМО · письма не отправляются</span>
+</header>
+
+<div class="wrap">
+
+  <div class="demo-note">
+    Это интерактивный прототип. Реальная отправка почты не выполняется — всё имитируется.
+    Показывает, как будет выглядеть готовый сайт.
+  </div>
+
+  <!-- ФОРМА ЗАЯВКИ -->
+  <div class="card">
+    <h2>1. Ваша заявка</h2>
+    <div class="row">
+      <div class="field">
+        <label>Ваше имя</label>
+        <input type="text" id="senderName" placeholder="Иван Петров">
+      </div>
+      <div class="field">
+        <label>Ваша почта (для ответов)</label>
+        <input type="email" id="senderEmail" placeholder="ivan@mail.ru">
+      </div>
+    </div>
+    <div class="field">
+      <label>Тема</label>
+      <select id="subject">
+        <option>Заказ кухонного гарнитура</option>
+        <option>Изготовление шкафа-купе</option>
+        <option>Мебель для офиса</option>
+        <option>Ремонт и реставрация мебели</option>
+        <option>Другое (уточню в тексте)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Описание заказа</label>
+      <textarea id="message" placeholder="Опишите, что нужно: размеры, материал, сроки, бюджет..."></textarea>
+      <div class="hint">Чем подробнее — тем больше шансов на ответ.</div>
+    </div>
+  </div>
+
+  <!-- КОМПАНИИ -->
+  <div class="card">
+    <h2>2. Кому отправить</h2>
+    <p class="hint" style="margin-bottom:12px;">
+      Выберите компании. В реальной версии список подгружается из базы и регулярно обновляется.
+    </p>
+    <div class="companies" id="companiesList"></div>
+    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn-secondary btn" onclick="selectAll(true)">Выбрать все</button>
+      <button class="btn-secondary btn" onclick="selectAll(false)">Снять все</button>
+    </div>
+  </div>
+
+  <!-- ОТПРАВКА -->
+  <div class="card">
+    <h2>3. Отправка</h2>
+    <button class="btn" id="sendBtn" onclick="send()">📨 Разослать заявку</button>
+    <div class="progress" id="progress">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">Отправка...</div>
+    </div>
+    <div class="status-msg ok" id="statusOk"></div>
+    <div class="status-msg warn" id="statusWarn"></div>
+  </div>
+
+  <!-- ВХОДЯЩИЕ -->
+  <div class="card inbox" id="inbox">
+    <h2>📥 Ответы от компаний</h2>
+    <p class="hint" style="margin-bottom:14px;">
+      Здесь появятся ответы. В реальной версии они приходят на почту сайта и автоматически подтягиваются сюда.
+    </p>
+    <div id="mailList"></div>
+  </div>
+
+  <div class="footer">Демо-прототип · МебельТаганрог</div>
+</div>
+
+<script>
+// --- База компаний (демо-данные) ---
+const COMPANIES = [
+  { id: 1, name: "ИП Водолазкин А. Н.", mail: "styl-taganrog@mail.ru", tag: "стулья, столы" },
+  { id: 2, name: "ИП Кошелев А. П.", mail: "mebel-pro-08@mail.ru", tag: "корпусная мебель" },
+  { id: 3, name: "ООО «Неолит-Т»", mail: "neolit.taganrog@rambler.ru", tag: "изделия из камня" },
+  { id: 4, name: "ООО «Дон Мет Импэкс»", mail: "polly50@bk.ru", tag: "мебель на заказ" },
+  { id: 5, name: "Мебельная фабрика «Юг»", mail: "yug-mebel@mail.ru", tag: "кухни, шкафы" },
+  { id: 6, name: "Студия «Дерево+»", mail: "derevo-plus@yandex.ru", tag: "мебель из массива" },
+];
+
+// --- Шаблоны ответов для имитации ---
+const REPLIES = [
+  { subj: "Re: Ваша заявка", body: "Здравствуйте! Спасибо за обращение. Можем обсудить детали — когда вам удобно созвониться?" },
+  { subj: "Re: Заявка принята", body: "Добрый день! Ваша заявка получена. Пришлите, пожалуйста, размеры помещения и фото." },
+  { subj: "Re: По вашему запросу", body: "Здравствуйте! Такой заказ можем выполнить. Ориентировочный срок — 3 недели. Бюджет уточним после замеров." },
+  { subj: "Re: Уточнение", body: "Добрый день! Уточните, пожалуйста, какой материал предпочитаете — ЛДСП или массив?" },
+];
+
+// --- Рендер списка компаний ---
+const listEl = document.getElementById('companiesList');
+function renderCompanies() {
+  listEl.innerHTML = '';
+  COMPANIES.forEach(c => {
+    const div = document.createElement('label');
+    div.className = 'company';
+    div.innerHTML = `
+      <input type="checkbox" value="${c.id}" checked onchange="toggleCheck(this)">
+      <div class="info">
+        <div class="name">${c.name}</div>
+        <div class="mail">${c.mail}</div>
+      </div>
+      <span class="tag">${c.tag}</span>
+    `;
+    listEl.appendChild(div);
+  });
+}
+renderCompanies();
+
+function toggleCheck(cb) {
+  cb.closest('.company').classList.toggle('checked', cb.checked);
+}
+function selectAll(val) {
+  document.querySelectorAll('#companiesList input[type=checkbox]').forEach(cb => {
+    cb.checked = val;
+    toggleCheck(cb);
+  });
+}
+// начальная подсветка
+document.querySelectorAll('#companiesList input[type=checkbox]').forEach(toggleCheck);
+
+// --- Отправка ---
+function send() {
+  const name = document.getElementById('senderName').value.trim();
+  const email = document.getElementById('senderEmail').value.trim();
+  const message = document.getElementById('message').value.trim();
+  const selected = [...document.querySelectorAll('#companiesList input:checked')]
+    .map(cb => COMPANIES.find(c => c.id == cb.value));
+
+  hideStatus();
+
+  if (!name || !email || !message) {
+    showStatus('warn', '⚠️ Заполните имя, почту и описание заказа.');
+    return;
+  }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    showStatus('warn', '⚠️ Похоже, email указан неверно.');
+    return;
+  }
+  if (selected.length === 0) {
+    showStatus('warn', '⚠️ Выберите хотя бы одну компанию.');
+    return;
+  }
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  const prog = document.getElementById('progress');
+  const fill = document.getElementById('progressFill');
+  const text = document.getElementById('progressText');
+  prog.style.display = 'block';
+  fill.style.width = '0%';
+
+  let i = 0;
+  const total = selected.length;
+
+  const timer = setInterval(() => {
+    i++;
+    const pct = Math.round((i / total) * 100);
+    fill.style.width = pct + '%';
+    text.textContent = `Отправлено ${i} из ${total}...`;
+
+    if (i >= total) {
+      clearInterval(timer);
+      btn.disabled = false;
+      text.textContent = `✅ Готово: ${total} писем отправлено (имитация).`;
+      showStatus('ok', `✅ Заявка разослана в ${total} компаний. Ответы появятся ниже в течение нескольких минут (в реальной версии).`);
+      // Имитация ответов: через 2-4 сек приходят 1-3 ответа
+      simulateReplies(selected);
+    }
+  }, 400);
+}
+
+function showStatus(type, msg) {
+  const el = document.getElementById(type === 'ok' ? 'statusOk' : 'statusWarn');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideStatus() {
+  document.getElementById('statusOk').classList.remove('show');
+  document.getElementById('statusWarn').classList.remove('show');
+}
+
+// --- Имитация входящих ответов ---
+let mailCounter = 0;
+function simulateReplies(selected) {
+  const inbox = document.getElementById('inbox');
+  const mailList = document.getElementById('mailList');
+  inbox.classList.add('show');
+
+  // выбираем случайные 1-3 компании из выбранных
+  const count = Math.min(selected.length, 1 + Math.floor(Math.random() * 3));
+  const shuffled = [...selected].sort(() => Math.random() - 0.5).slice(0, count);
+
+  shuffled.forEach((comp, idx) => {
+    setTimeout(() => {
+      const tpl = REPLIES[Math.floor(Math.random() * REPLIES.length)];
+      const now = new Date();
+      const time = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      mailCounter++;
+      const div = document.createElement('div');
+      div.className = 'mail-item';
+      div.innerHTML = `
+        <span class="time">${time}</span>
+        <div class="from">${comp.name} &lt;${comp.mail}&gt;</div>
+        <div class="subject">${tpl.subj}</div>
+        <div class="body">${tpl.body}</div>
+      `;
+      mailList.prepend(div);
+    }, 1500 + idx * 1200);
+  });
+}
+</script>
+
+</body>
+</html>
